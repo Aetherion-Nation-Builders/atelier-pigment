@@ -64,6 +64,8 @@ impl Catalog {
     pub fn parse(text: &str) -> Catalog {
         let mut c = Catalog::default();
         for (ctx, src, tr) in parse_entries(text).0 {
+            // The catalogs name the upstream product; the UI names ours (see `identity`).
+            let (src, tr) = (crate::identity::rewrite(&src), crate::identity::rewrite(&tr));
             match ctx.as_str() {
                 "" => {
                     c.plain.insert(src, tr);
@@ -80,6 +82,14 @@ impl Catalog {
             }
         }
         c
+    }
+
+    /// Adds (or replaces) context-free strings: the brand layer's own strings (`identity::strings`).
+    pub fn with_plain(mut self, entries: Vec<(&str, &str)>) -> Catalog {
+        for (src, tr) in entries {
+            self.plain.insert(src.to_string(), tr.to_string());
+        }
+        self
     }
 
     pub fn plain(&self, s: &str) -> Option<&str> {

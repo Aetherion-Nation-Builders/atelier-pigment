@@ -157,7 +157,7 @@ impl LangInfo {
     }
 
     fn catalog(&self) -> &Catalog {
-        self.catalog.get_or_init(|| Catalog::parse(&self.text()))
+        self.catalog.get_or_init(|| Catalog::parse(&self.text()).with_plain(crate::identity::strings(self.code)))
     }
 }
 

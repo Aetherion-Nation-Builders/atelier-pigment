@@ -7,9 +7,9 @@
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleDisplayName</key>
-  <string>PhotoCraft</string>
+  <string>Atelier Pigment</string>
   <key>CFBundleName</key>
-  <string>PhotoCraft</string>
+  <string>Atelier Pigment</string>
   <key>CFBundleExecutable</key>
   <string>PhotoCraft</string>
   <key>CFBundleIdentifier</key>
@@ -43,7 +43,7 @@
   <key>NSRequiresAquaSystemAppearance</key>
   <false/>
   <key>NSHumanReadableCopyright</key>
-  <string>Copyright © the PhotoCraft authors. MIT OR Apache-2.0.</string>
+  <string>Copyright © Aetherion Nation and the PhotoCraft authors. MIT OR Apache-2.0.</string>
 
   <!-- Photocraft's own format. -->
   <key>UTExportedTypeDeclarations</key>
@@ -52,7 +52,7 @@
       <key>UTTypeIdentifier</key>
       <string>ai.storyteller.photocraft.document</string>
       <key>UTTypeDescription</key>
-      <string>PhotoCraft Document</string>
+      <string>Atelier Pigment Document</string>
       <key>UTTypeConformsTo</key>
       <array>
         <string>public.data</string>
@@ -140,7 +140,7 @@
   <array>
     <dict>
       <key>CFBundleTypeName</key>
-      <string>PhotoCraft Document</string>
+      <string>Atelier Pigment Document</string>
       <key>CFBundleTypeRole</key>
       <string>Editor</string>
       <key>LSHandlerRank</key>
