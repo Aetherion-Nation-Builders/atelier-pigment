@@ -1,0 +1,124 @@
+# Atelier brand strings: the UI strings that are ours, not PhotoCraft's, with their translations.
+# Format: language code <TAB> English source <TAB> translation. The `product` line is the rename
+# applied to every upstream catalog entry as it loads (see identity.rs and docs/brand.md).
+# Languages without a line for a string show the English.
+product	PhotoCraft	Atelier Pigment
+
+en	Join the Nation	Join the Nation
+en	Join the Nation…	Join the Nation…
+en	Nation	Nation
+en	Atelier Suite	Atelier Suite
+en	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.
+en	Atelier	Atelier
+
+fr	Join the Nation	Rejoindre la Nation
+fr	Join the Nation…	Rejoindre la Nation…
+fr	Nation	Nation
+fr	Atelier Suite	Suite Atelier
+fr	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — l'éditeur d'images de la Nation. Fondé sur PhotoCraft, libre, écrit en Rust.
+fr	Atelier	Atelier
+
+de	Join the Nation	Der Nation beitreten
+de	Join the Nation…	Der Nation beitreten…
+de	Nation	Nation
+de	Atelier Suite	Atelier-Suite
+de	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — der Bildeditor der Nation. Aufgebaut auf PhotoCraft, Open Source, in Rust.
+de	Atelier	Atelier
+
+es	Join the Nation	Únete a la Nación
+es	Join the Nation…	Únete a la Nación…
+es	Nation	Nación
+es	Atelier Suite	Suite Atelier
+es	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — el editor de imágenes de la Nación. Construido sobre PhotoCraft, de código abierto, en Rust.
+es	Atelier	Atelier
+
+it	Join the Nation	Unisciti alla Nazione
+it	Join the Nation…	Unisciti alla Nazione…
+it	Nation	Nazione
+it	Atelier Suite	Suite Atelier
+it	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — l'editor di immagini della Nazione. Basato su PhotoCraft, open source, in Rust.
+it	Atelier	Atelier
+
+pt-br	Join the Nation	Junte-se à Nação
+pt-br	Join the Nation…	Junte-se à Nação…
+pt-br	Nation	Nação
+pt-br	Atelier Suite	Suíte Atelier
+pt-br	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — o editor de imagens da Nação. Construído sobre o PhotoCraft, código aberto, em Rust.
+pt-br	Atelier	Atelier
+
+nl	Join the Nation	Word lid van de Natie
+nl	Join the Nation…	Word lid van de Natie…
+nl	Nation	Natie
+nl	Atelier Suite	Atelier-suite
+nl	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — de beeldbewerker van de Natie. Gebouwd op PhotoCraft, open source, in Rust.
+nl	Atelier	Atelier
+
+pl	Join the Nation	Dołącz do Narodu
+pl	Join the Nation…	Dołącz do Narodu…
+pl	Nation	Naród
+pl	Atelier Suite	Pakiet Atelier
+pl	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — edytor obrazów Narodu. Zbudowany na PhotoCraft, open source, w Rust.
+pl	Atelier	Atelier
+
+cs	Join the Nation	Přidat se k Národu
+cs	Join the Nation…	Přidat se k Národu…
+cs	Nation	Národ
+cs	Atelier Suite	Sada Atelier
+cs	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — obrazový editor Národa. Postaven na PhotoCraftu, open source, v Rustu.
+cs	Atelier	Atelier
+
+ru	Join the Nation	Присоединиться к Нации
+ru	Join the Nation…	Присоединиться к Нации…
+ru	Nation	Нация
+ru	Atelier Suite	Пакет Atelier
+ru	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — редактор изображений Нации. Построен на PhotoCraft, открытый код, на Rust.
+ru	Atelier	Atelier
+
+uk	Join the Nation	Приєднатися до Нації
+uk	Join the Nation…	Приєднатися до Нації…
+uk	Nation	Нація
+uk	Atelier Suite	Пакет Atelier
+uk	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — редактор зображень Нації. Побудований на PhotoCraft, відкритий код, на Rust.
+uk	Atelier	Atelier
+
+el	Join the Nation	Γίνετε μέλος του Έθνους
+el	Join the Nation…	Γίνετε μέλος του Έθνους…
+el	Nation	Έθνος
+el	Atelier Suite	Σουίτα Atelier
+el	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — ο επεξεργαστής εικόνων του Έθνους. Χτισμένος πάνω στο PhotoCraft, ανοιχτού κώδικα, σε Rust.
+el	Atelier	Atelier
+
+id	Join the Nation	Bergabung dengan Nation
+id	Join the Nation…	Bergabung dengan Nation…
+id	Nation	Nation
+id	Atelier Suite	Suite Atelier
+id	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — penyunting gambar milik Nation. Dibangun di atas PhotoCraft, sumber terbuka, dalam Rust.
+id	Atelier	Atelier
+
+ja	Join the Nation	Nation に参加
+ja	Join the Nation…	Nation に参加…
+ja	Nation	Nation
+ja	Atelier Suite	Atelier スイート
+ja	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — Nation の画像エディター。PhotoCraft を基に、オープンソース、Rust 製。
+ja	Atelier	Atelier
+
+ko	Join the Nation	Nation에 참여
+ko	Join the Nation…	Nation에 참여…
+ko	Nation	Nation
+ko	Atelier Suite	Atelier 스위트
+ko	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — Nation의 이미지 편집기. PhotoCraft 기반, 오픈 소스, Rust로 제작.
+ko	Atelier	Atelier
+
+zh-hans	Join the Nation	加入 Nation
+zh-hans	Join the Nation…	加入 Nation…
+zh-hans	Nation	Nation
+zh-hans	Atelier Suite	Atelier 套件
+zh-hans	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — Nation 的图像编辑器。基于 PhotoCraft，开源，Rust 编写。
+zh-hans	Atelier	Atelier
+
+zh-hant	Join the Nation	加入 Nation
+zh-hant	Join the Nation…	加入 Nation…
+zh-hant	Nation	Nation
+zh-hant	Atelier Suite	Atelier 套件
+zh-hant	Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.	Atelier Pigment — Nation 的影像編輯器。基於 PhotoCraft，開放原始碼，Rust 編寫。
+zh-hant	Atelier	Atelier

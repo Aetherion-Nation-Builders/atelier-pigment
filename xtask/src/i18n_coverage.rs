@@ -29,11 +29,12 @@ pub fn run(root: &Path) -> Result<(), String> {
             catalog_texts.insert(language.code.clone(), (full_path, text));
         }
     }
+    let brand = brand_overlay(&i18n_dir)?;
     let mut translations = BTreeMap::new();
     for language in &languages {
         let entries = if language.catalog.is_some() {
             let (full_path, text) = catalog_texts.get(&language.code).ok_or_else(|| format!("missing source for registered language `{}`", language.code))?;
-            parse_catalog(full_path, text)?
+            brand.apply(&language.code, parse_catalog(full_path, text)?)
         } else {
             BTreeSet::new()
         };
@@ -417,6 +418,50 @@ fn unescape_rust_string(raw: &str) -> String {
     out
 }
 
+/// The brand layer's view of the catalogs (`crates/ui-egui/src/i18n/brand.tsv`, read at runtime by
+/// `photocraft_ui_egui::identity`): the upstream product name is rewritten in every catalog key,
+/// and the brand's own strings count as translated where the file carries them.
+struct BrandOverlay {
+    rename: Option<(String, String)>,
+    strings: BTreeMap<String, BTreeSet<Key>>,
+}
+
+impl BrandOverlay {
+    fn apply(&self, code: &str, keys: BTreeSet<Key>) -> BTreeSet<Key> {
+        let mut out: BTreeSet<Key> = keys
+            .into_iter()
+            .map(|k| match &self.rename {
+                Some((from, to)) => Key { context: k.context, source: k.source.replace(from.as_str(), to.as_str()) },
+                None => k,
+            })
+            .collect();
+        if let Some(own) = self.strings.get(code) {
+            out.extend(own.iter().cloned());
+        }
+        out
+    }
+}
+
+fn brand_overlay(i18n_dir: &Path) -> Result<BrandOverlay, String> {
+    let path = i18n_dir.join("brand.tsv");
+    let Ok(text) = fs::read_to_string(&path) else { return Ok(BrandOverlay { rename: None, strings: BTreeMap::new() }) };
+    let mut overlay = BrandOverlay { rename: None, strings: BTreeMap::new() };
+    for (index, line) in text.lines().enumerate() {
+        if line.trim().is_empty() || line.starts_with('#') {
+            continue;
+        }
+        let mut columns = line.split('\t');
+        match (columns.next(), columns.next(), columns.next(), columns.next()) {
+            (Some("product"), Some(from), Some(to), None) if !from.is_empty() && !to.is_empty() => overlay.rename = Some((from.into(), to.into())),
+            (Some(code), Some(source), Some(translation), None) if !source.is_empty() && !translation.is_empty() => {
+                overlay.strings.entry(code.to_string()).or_default().insert(Key { context: String::new(), source: unescape_tsv(source) });
+            }
+            _ => return Err(format!("{}:{line_no}: expected `code<TAB>source<TAB>translation`", path.display(), line_no = index + 1)),
+        }
+    }
+    Ok(overlay)
+}
+
 fn parse_catalog(path: &Path, text: &str) -> Result<BTreeSet<Key>, String> {
     let mut keys = BTreeSet::new();
     for (index, line) in text.lines().enumerate() {
@@ -573,11 +618,29 @@ mod tests {
             ("uk", "uk.tsv"),
             ("nl", "nl.tsv"),
         ] {
-            let catalog_path = root.join("crates/ui-egui/src/i18n").join(path);
+            let i18n_dir = root.join("crates/ui-egui/src/i18n");
+            let catalog_path = i18n_dir.join(path);
             let text = fs::read_to_string(&catalog_path).unwrap_or_default();
-            let translations = parse_catalog(&catalog_path, &text).unwrap_or_default();
+            let brand = brand_overlay(&i18n_dir).expect("brand.tsv parses");
+            let translations = brand.apply(code, parse_catalog(&catalog_path, &text).unwrap_or_default());
             let missing: Vec<_> = keys.difference(&translations).collect();
             assert!(missing.is_empty(), "{code}: missing source keys: {missing:#?}");
         }
+    }
+
+    #[test]
+    fn the_brand_overlay_renames_catalog_keys_and_adds_its_own_strings() {
+        let dir = std::env::temp_dir().join(format!("xtask-brand-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(dir.join("brand.tsv"), "# c\nproduct\tOld\tNew\nfr\tJoin\tRejoindre\nen\tJoin\tJoin\n").unwrap();
+        let overlay = brand_overlay(&dir).unwrap();
+        let key = |s: &str| Key { context: String::new(), source: s.into() };
+        let fr = overlay.apply("fr", [key("About Old"), key("Open")].into_iter().collect());
+        assert_eq!(fr, [key("About New"), key("Open"), key("Join")].into_iter().collect());
+        let de = overlay.apply("de", [key("About Old")].into_iter().collect());
+        assert_eq!(de, [key("About New")].into_iter().collect());
+        let none = brand_overlay(&dir.join("nowhere")).unwrap();
+        assert_eq!(none.apply("fr", [key("About Old")].into_iter().collect()), [key("About Old")].into_iter().collect());
+        fs::remove_dir_all(&dir).unwrap();
     }
 }

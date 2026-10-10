@@ -48,134 +48,55 @@ mod tests {
     }
 }
 
-/// UI strings that are ours, not upstream's, with their translations: the catalogs cannot carry
-/// them (they are upstream files), so they are added to each language's catalog as it loads.
-/// `about` is the one line in the About box.
-pub fn strings(code: &str) -> Vec<(&'static str, &'static str)> {
-    const JOIN: &str = "Join the Nation";
-    const JOIN_MENU: &str = "Join the Nation…";
-    const NATION: &str = "Nation";
-    const SUITE_MENU: &str = "Atelier Suite";
-    const ABOUT: &str = "Atelier Pigment — the Nation's image editor. Built on PhotoCraft, open source, in Rust.";
-    let (join, join_menu, nation, suite_menu, about) = match code {
-        "fr" => (
-            "Rejoindre la Nation",
-            "Rejoindre la Nation…",
-            "Nation",
-            "Suite Atelier",
-            "Atelier Pigment — l'éditeur d'images de la Nation. Fondé sur PhotoCraft, libre, écrit en Rust.",
-        ),
-        "de" => (
-            "Der Nation beitreten",
-            "Der Nation beitreten…",
-            "Nation",
-            "Atelier-Suite",
-            "Atelier Pigment — der Bildeditor der Nation. Aufgebaut auf PhotoCraft, Open Source, in Rust.",
-        ),
-        "es" => (
-            "Únete a la Nación",
-            "Únete a la Nación…",
-            "Nación",
-            "Suite Atelier",
-            "Atelier Pigment — el editor de imágenes de la Nación. Construido sobre PhotoCraft, de código abierto, en Rust.",
-        ),
-        "it" => (
-            "Unisciti alla Nazione",
-            "Unisciti alla Nazione…",
-            "Nazione",
-            "Suite Atelier",
-            "Atelier Pigment — l'editor di immagini della Nazione. Basato su PhotoCraft, open source, in Rust.",
-        ),
-        "pt-br" => (
-            "Junte-se à Nação",
-            "Junte-se à Nação…",
-            "Nação",
-            "Suíte Atelier",
-            "Atelier Pigment — o editor de imagens da Nação. Construído sobre o PhotoCraft, código aberto, em Rust.",
-        ),
-        "nl" => (
-            "Word lid van de Natie",
-            "Word lid van de Natie…",
-            "Natie",
-            "Atelier-suite",
-            "Atelier Pigment — de beeldbewerker van de Natie. Gebouwd op PhotoCraft, open source, in Rust.",
-        ),
-        "pl" => (
-            "Dołącz do Narodu",
-            "Dołącz do Narodu…",
-            "Naród",
-            "Pakiet Atelier",
-            "Atelier Pigment — edytor obrazów Narodu. Zbudowany na PhotoCraft, open source, w Rust.",
-        ),
-        "cs" => (
-            "Přidat se k Národu",
-            "Přidat se k Národu…",
-            "Národ",
-            "Sada Atelier",
-            "Atelier Pigment — obrazový editor Národa. Postaven na PhotoCraftu, open source, v Rustu.",
-        ),
-        "ru" => (
-            "Присоединиться к Нации",
-            "Присоединиться к Нации…",
-            "Нация",
-            "Пакет Atelier",
-            "Atelier Pigment — редактор изображений Нации. Построен на PhotoCraft, открытый код, на Rust.",
-        ),
-        "uk" => (
-            "Приєднатися до Нації",
-            "Приєднатися до Нації…",
-            "Нація",
-            "Пакет Atelier",
-            "Atelier Pigment — редактор зображень Нації. Побудований на PhotoCraft, відкритий код, на Rust.",
-        ),
-        "el" => (
-            "Γίνετε μέλος του Έθνους",
-            "Γίνετε μέλος του Έθνους…",
-            "Έθνος",
-            "Σουίτα Atelier",
-            "Atelier Pigment — ο επεξεργαστής εικόνων του Έθνους. Χτισμένος πάνω στο PhotoCraft, ανοιχτού κώδικα, σε Rust.",
-        ),
-        "id" => (
-            "Bergabung dengan Nation",
-            "Bergabung dengan Nation…",
-            "Nation",
-            "Suite Atelier",
-            "Atelier Pigment — penyunting gambar milik Nation. Dibangun di atas PhotoCraft, sumber terbuka, dalam Rust.",
-        ),
-        "ja" => (
-            "Nation に参加",
-            "Nation に参加…",
-            "Nation",
-            "Atelier スイート",
-            "Atelier Pigment — Nation の画像エディター。PhotoCraft を基に、オープンソース、Rust 製。",
-        ),
-        "ko" => (
-            "Nation에 참여",
-            "Nation에 참여…",
-            "Nation",
-            "Atelier 스위트",
-            "Atelier Pigment — Nation의 이미지 편집기. PhotoCraft 기반, 오픈 소스, Rust로 제작.",
-        ),
-        "zh-hans" => ("加入 Nation", "加入 Nation…", "Nation", "Atelier 套件", "Atelier Pigment — Nation 的图像编辑器。基于 PhotoCraft，开源，Rust 编写。"),
-        "zh-hant" => {
-            ("加入 Nation", "加入 Nation…", "Nation", "Atelier 套件", "Atelier Pigment — Nation 的影像編輯器。基於 PhotoCraft，開放原始碼，Rust 編寫。")
+/// Our own UI strings, with their translations: `i18n/brand.tsv`. The catalogs are upstream
+/// files, so our strings live beside them and are added to each language's catalog as it loads.
+/// The file's `product` line is the rename [`rewrite`] applies; a test keeps it equal to
+/// [`PRODUCT`].
+const BRAND_TSV: &str = include_str!("i18n/brand.tsv");
+
+/// `(code, source, translation)` for every line of `brand.tsv` (the `product` line included).
+fn brand_lines() -> impl Iterator<Item = (&'static str, &'static str, &'static str)> {
+    BRAND_TSV.lines().filter(|l| !l.trim().is_empty() && !l.starts_with('#')).filter_map(|l| {
+        let mut cols = l.split('\t');
+        match (cols.next(), cols.next(), cols.next(), cols.next()) {
+            (Some(code), Some(src), Some(tr), None) if !src.is_empty() && !tr.is_empty() => Some((code, src, tr)),
+            _ => None,
         }
-        _ => (JOIN, JOIN_MENU, NATION, SUITE_MENU, ABOUT),
-    };
-    vec![(JOIN, join), (JOIN_MENU, join_menu), (NATION, nation), (SUITE_MENU, suite_menu), (ABOUT, about), ("Atelier", "Atelier")]
+    })
+}
+
+/// The brand strings for a language (English for a language the file does not cover).
+pub fn strings(code: &str) -> Vec<(&'static str, &'static str)> {
+    let of = |c: &str| brand_lines().filter(|(l, _, _)| *l == c).map(|(_, s, t)| (s, t)).collect::<Vec<_>>();
+    let own = of(code);
+    if own.is_empty() { of("en") } else { own }
 }
 
 #[cfg(test)]
 mod string_tests {
+    use super::*;
+
     #[test]
-    fn every_language_gets_the_same_set_of_keys() {
-        let en: Vec<&str> = super::strings("en").iter().map(|(k, _)| *k).collect();
-        for code in ["fr", "de", "es", "it", "pt-br", "nl", "pl", "cs", "ru", "uk", "el", "id", "ja", "ko", "zh-hans", "zh-hant", "xx"] {
-            let keys: Vec<&str> = super::strings(code).iter().map(|(k, _)| *k).collect();
+    fn the_product_line_matches_the_constants() {
+        let product = brand_lines().find(|(code, _, _)| *code == "product");
+        assert_eq!(product, Some(("product", UPSTREAM, PRODUCT)));
+    }
+
+    #[test]
+    fn every_line_parses_and_every_language_covers_the_english_set() {
+        let lines = BRAND_TSV.lines().filter(|l| !l.trim().is_empty() && !l.starts_with('#')).count();
+        assert_eq!(lines, brand_lines().count(), "every non-comment line of brand.tsv has three columns");
+        let en: Vec<&str> = strings("en").iter().map(|(k, _)| *k).collect();
+        assert!(en.len() >= 5);
+        let codes: std::collections::BTreeSet<&str> = brand_lines().map(|(c, _, _)| c).filter(|c| *c != "product" && *c != "en").collect();
+        assert!(codes.len() >= 16, "{codes:?}");
+        for code in codes {
+            let keys: Vec<&str> = strings(code).iter().map(|(k, _)| *k).collect();
             assert_eq!(keys, en, "{code}");
-            for (k, v) in super::strings(code) {
-                assert!(!v.is_empty() && v.matches('…').count() == k.matches('…').count(), "{code}: {k:?} -> {v:?}");
+            for (k, v) in strings(code) {
+                assert_eq!(v.matches('…').count(), k.matches('…').count(), "{code}: {k:?} -> {v:?}");
             }
         }
+        assert_eq!(strings("xx"), strings("en"));
     }
 }

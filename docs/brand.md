@@ -19,7 +19,7 @@ These change only when we decide to stop tracking upstream, in one deliberate pa
 | Place | File |
 |---|---|
 | The constants | `crates/ui-egui/src/identity.rs` (`PRODUCT`, `SHORT`, `SUITE`, `VENDOR`) |
-| Translations, every language | rewritten on load in `crates/ui-egui/src/i18n/catalog.rs` (`identity::rewrite`), so the `.tsv` catalogs stay untouched |
+| Translations, every language | rewritten on load in `crates/ui-egui/src/i18n/catalog.rs` (`identity::rewrite`), so the upstream `.tsv` catalogs stay untouched; our own strings and their translations are in `crates/ui-egui/src/i18n/brand.tsv` (`cargo xtask i18n-coverage` reads it too) |
 | English UI strings | literal `"Atelier Pigment"` in `crates/ui-egui/src` and `apps/` (the catalogs' keys are rewritten to match) |
 | macOS app menu | `crates/ui-egui/src/native_menu.rs` `APP_NAME` |
 | Links | `crates/ui-egui/src/links.rs` (menu ids keep their upstream names, the URLs are ours) |
