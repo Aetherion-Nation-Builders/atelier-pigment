@@ -76,9 +76,6 @@ jobs:
     name: test (${{ matrix.os }})
     needs: platforms
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
@@ -121,21 +118,20 @@ jobs:
           set -o pipefail
           cargo test --workspace --locked --features heif 2>&1 | tee test.log
 
-      # Atelier: the failing tests, as a comment on the pull request, for readers who cannot open
-      # the job log (the build agents, whose network does not reach the log store).
-      - name: Report failing tests on the pull request
-        if: failure() && github.event_name == 'pull_request'
+      # Atelier: the failing tests as job annotations (readable through the API by the build
+      # agents, whose network does not reach the job log store). No permissions needed.
+      - name: Report failing tests
+        if: failure()
         shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          {
-            echo "**Failing tests on ${{ matrix.os }}** (from the Test step; full log in the job):"
-            echo '```'
-            grep -E "^test .* FAILED|^---- .* stdout ----|panicked at|^error(\[E[0-9]+\])?:|^    [a-z_:]+$|test result: FAILED" test.log | head -80
-            echo '```'
-          } > report.md
-          gh pr comment "${{ github.event.pull_request.number }}" --body-file report.md || echo "could not comment"
+          set +e
+          grep -E "^test .* FAILED$" test.log | sed 's/^test //; s/ \.\.\. FAILED$//' | sort -u | head -10 | while read -r name; do
+            echo "::error title=Failing test::${name}"
+          done
+          grep -E "panicked at|^error(\[E[0-9]+\])?:" test.log | sort -u | head -10 | while read -r line; do
+            echo "::error title=Test output::${line:0:900}"
+          done
+          true
 
       # The same codecs without the optional decoder: HEIC must stay a clear "not in this build"
       # error for distributors who leave it out.
