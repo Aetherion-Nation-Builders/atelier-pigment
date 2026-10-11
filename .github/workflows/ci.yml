@@ -117,6 +117,7 @@ jobs:
       # "No space left on device"); the output is kept in test.log for the report step below.
       - name: Test
         shell: bash
+        timeout-minutes: 90
         run: |
           set -o pipefail
           cargo test --workspace --exclude photocraft-ui-egui --exclude photocraft --locked --features heif 2>&1 | tee test.log
@@ -162,10 +163,16 @@ jobs:
 
       - name: Test with craft-fonts
         if: runner.os == 'Linux'
+        timeout-minutes: 90
         env:
           CRAFT_FONTS_DIR: ${{ github.workspace }}/craft-fonts
           CRAFT_FONTS_REQUIRED: "1"
-        run: cargo test --workspace --locked --features heif
+        # Atelier: the same two halves as the Test step, for the same disk reason.
+        run: |
+          find target/debug/deps -maxdepth 1 -type f -size +40M ! -name "*.rmeta" ! -name "*.rlib" ! -name "*.so" -delete
+          cargo test --workspace --exclude photocraft-ui-egui --exclude photocraft --locked --features heif
+          find target/debug/deps -maxdepth 1 -type f -size +40M ! -name "*.rmeta" ! -name "*.rlib" ! -name "*.so" -delete
+          cargo test -p photocraft-ui-egui -p photocraft --locked --features heif
 
       - name: Clippy
         run: cargo clippy --workspace --all-targets --locked --features heif -- -D warnings
