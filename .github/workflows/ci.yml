@@ -76,6 +76,9 @@ jobs:
     name: test (${{ matrix.os }})
     needs: platforms
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
@@ -113,7 +116,26 @@ jobs:
 
       # `--features heif`: official builds open HEIC photos via the optional photocraft-heif crate.
       - name: Test
-        run: cargo test --workspace --locked --features heif
+        shell: bash
+        run: |
+          set -o pipefail
+          cargo test --workspace --locked --features heif 2>&1 | tee test.log
+
+      # Atelier: the failing tests, as a comment on the pull request, for readers who cannot open
+      # the job log (the build agents, whose network does not reach the log store).
+      - name: Report failing tests on the pull request
+        if: failure() && github.event_name == 'pull_request'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "**Failing tests on ${{ matrix.os }}** (from the Test step; full log in the job):"
+            echo '```'
+            grep -E "^test .* FAILED|^---- .* stdout ----|panicked at|^error(\[E[0-9]+\])?:|^    [a-z_:]+$|test result: FAILED" test.log | head -80
+            echo '```'
+          } > report.md
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file report.md || echo "could not comment"
 
       # The same codecs without the optional decoder: HEIC must stay a clear "not in this build"
       # error for distributors who leave it out.
