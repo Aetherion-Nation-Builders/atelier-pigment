@@ -112,11 +112,16 @@ jobs:
         run: cargo fmt --all -- --check
 
       # `--features heif`: official builds open HEIC photos via the optional photocraft-heif crate.
+      # Atelier: in two halves, dropping the first half's test binaries in between. The whole
+      # workspace's test binaries do not fit a 14 GB runner on a cold cache (the job died with
+      # "No space left on device"); the output is kept in test.log for the report step below.
       - name: Test
         shell: bash
         run: |
           set -o pipefail
-          cargo test --workspace --locked --features heif 2>&1 | tee test.log
+          cargo test --workspace --exclude photocraft-ui-egui --exclude photocraft --locked --features heif 2>&1 | tee test.log
+          find target/debug/deps -maxdepth 1 -type f -size +40M ! -name "*.rmeta" ! -name "*.rlib" ! -name "*.so" ! -name "*.dll" -delete
+          cargo test -p photocraft-ui-egui -p photocraft --locked --features heif 2>&1 | tee -a test.log
 
       # Atelier: the failing tests as job annotations (readable through the API by the build
       # agents, whose network does not reach the job log store). No permissions needed.
