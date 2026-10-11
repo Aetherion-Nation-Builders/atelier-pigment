@@ -121,26 +121,8 @@ jobs:
         run: |
           set -o pipefail
           cargo test --workspace --exclude photocraft-ui-egui --exclude photocraft --locked --features heif 2>&1 | tee test.log
-          find target/debug/deps -maxdepth 1 -type f -size +40M ! -name "*.rmeta" ! -name "*.rlib" ! -name "*.so" ! -name "*.dll" -delete
+          rm -rf target/debug/examples; find target/debug/deps -maxdepth 1 -type f -size +40M ! -name "*.rmeta" ! -name "*.rlib" ! -name "*.so" ! -name "*.dll" -delete
           cargo test -p photocraft-ui-egui -p photocraft --locked --features heif 2>&1 | tee -a test.log
-
-      # Atelier: the failing tests as job annotations (readable through the API by the build
-      # agents, whose network does not reach the job log store). No permissions needed.
-      - name: Report failing tests
-        if: failure()
-        shell: bash
-        run: |
-          set +e
-          # CARGO_TERM_COLOR=always: strip the colour codes before matching.
-          sed 's/\x1b\[[0-9;]*[A-Za-z]//g' test.log > plain.log
-          grep -E "^test .* FAILED$" plain.log | sed 's/^test //; s/ \.\.\. FAILED$//' | sort -u | head -10 | while read -r name; do
-            echo "::error title=Failing test::${name}"
-          done
-          grep -E "panicked at|^error(\[E[0-9]+\])?:|No space left|SIGKILL|signal: " plain.log | sort -u | head -10 | while read -r line; do
-            echo "::error title=Test output::${line:0:900}"
-          done
-          echo "::error title=Test log tail::$(tail -c 1500 plain.log | tr '\n' ' ' | cut -c1-1400)"
-          true
 
       # The same codecs without the optional decoder: HEIC must stay a clear "not in this build"
       # error for distributors who leave it out.
@@ -169,10 +151,11 @@ jobs:
           CRAFT_FONTS_REQUIRED: "1"
         # Atelier: the same two halves as the Test step, for the same disk reason.
         run: |
-          find target/debug/deps -maxdepth 1 -type f -size +40M ! -name "*.rmeta" ! -name "*.rlib" ! -name "*.so" -delete
-          cargo test --workspace --exclude photocraft-ui-egui --exclude photocraft --locked --features heif
-          find target/debug/deps -maxdepth 1 -type f -size +40M ! -name "*.rmeta" ! -name "*.rlib" ! -name "*.so" -delete
-          cargo test -p photocraft-ui-egui -p photocraft --locked --features heif
+          set -o pipefail
+          rm -rf target/debug/examples; find target/debug/deps -maxdepth 1 -type f -size +40M ! -name "*.rmeta" ! -name "*.rlib" ! -name "*.so" -delete
+          cargo test --workspace --exclude photocraft-ui-egui --exclude photocraft --locked --features heif 2>&1 | tee -a test.log
+          rm -rf target/debug/examples; find target/debug/deps -maxdepth 1 -type f -size +40M ! -name "*.rmeta" ! -name "*.rlib" ! -name "*.so" -delete
+          cargo test -p photocraft-ui-egui -p photocraft --locked --features heif 2>&1 | tee -a test.log
 
       - name: Clippy
         run: cargo clippy --workspace --all-targets --locked --features heif -- -D warnings
@@ -185,6 +168,24 @@ jobs:
       - name: Scorecard up to date
         if: runner.os == 'Linux'
         run: cargo xtask scorecard --check
+
+      # Atelier: the failing tests as job annotations (readable through the API by the build
+      # agents, whose network does not reach the job log store). No permissions needed.
+      - name: Report failing tests
+        if: failure()
+        shell: bash
+        run: |
+          set +e
+          # CARGO_TERM_COLOR=always: strip the colour codes before matching.
+          sed 's/\x1b\[[0-9;]*[A-Za-z]//g' test.log > plain.log
+          grep -E "^test .* FAILED$" plain.log | sed 's/^test //; s/ \.\.\. FAILED$//' | sort -u | head -10 | while read -r name; do
+            echo "::error title=Failing test::${name}"
+          done
+          grep -E "panicked at|^error(\[E[0-9]+\])?:|No space left|SIGKILL|signal: " plain.log | sort -u | head -10 | while read -r line; do
+            echo "::error title=Test output::${line:0:900}"
+          done
+          echo "::error title=Test log tail::$(tail -c 1500 plain.log | tr '\n' ' ' | cut -c1-1400)"
+          true
 
   corpus:
     # Real-file corpus tests (cargo feature `corpus`), on every PR and on main. The corpora are
