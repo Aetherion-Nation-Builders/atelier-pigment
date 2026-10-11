@@ -17,6 +17,10 @@ automatically (`.gitattributes` marks it `merge=ours`; the script enables that m
 in below the line; if the header conflicts, keep ours. For anything else, keep upstream's logic
 and re-apply the rename.
 
+CI here runs on Linux only: a cold Windows runner takes over 90 minutes and bills double, and
+upstream's own CI covers Windows for the code every sync brings in. `ci.yml`'s platform step
+lists the runners; add `windows-latest` back when preparing a Windows release.
+
 Workflows that are turned off in this repository, on purpose (they cost Actions minutes and
 build things we do not ship yet): `perf-nightly.yml`, `freebsd.yml`, `windows-arm64.yml`,
 `release.yml`. Turn one on from the Actions tab when it is wanted.
