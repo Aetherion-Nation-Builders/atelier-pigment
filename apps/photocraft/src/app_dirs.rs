@@ -15,9 +15,9 @@ use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
 /// Files beside the executable that switch on portable mode (either one; contents are ignored).
-pub const PORTABLE_MARKERS: [&str; 2] = ["portable.txt", "PhotoCraft.portable"];
+pub const PORTABLE_MARKERS: [&str; 2] = ["portable.txt", "Pigment.portable"];
 /// The data folder created beside the executable in portable mode.
-pub const PORTABLE_DATA_DIR: &str = "PhotoCraftData";
+pub const PORTABLE_DATA_DIR: &str = "PigmentData";
 
 /// How [`DataDir::dir`] was chosen.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -85,7 +85,7 @@ pub fn resolve(env: impl Fn(&str) -> Option<OsString>, exe_dir: Option<&Path>) -
 pub fn platform_dir(env: &impl Fn(&str) -> Option<OsString>) -> Option<PathBuf> {
     let home = env("HOME").filter(|h| !h.is_empty()).map(PathBuf::from);
     if cfg!(target_os = "macos") {
-        return home.map(|h| h.join("Library/Application Support/Photocraft"));
+        return home.map(|h| h.join("Library/Application Support/Atelier Pigment"));
     }
     if cfg!(windows) {
         return env("APPDATA").filter(|a| !a.is_empty()).map(|a| PathBuf::from(a).join("Photocraft"));
@@ -149,7 +149,7 @@ mod tests {
         assert!(!exe.join(PORTABLE_DATA_DIR).exists(), "no portable folder without a marker");
         // The convention per platform.
         if cfg!(target_os = "macos") {
-            assert_eq!(dir, root.join("home/Library/Application Support/Photocraft"));
+            assert_eq!(dir, root.join("home/Library/Application Support/Atelier Pigment"));
         } else if cfg!(windows) {
             assert_eq!(dir, root.join("appdata").join("Photocraft"));
         } else {
@@ -162,7 +162,7 @@ mod tests {
     fn either_marker_keeps_everything_beside_the_exe() {
         for marker in PORTABLE_MARKERS {
             let root = temp("portable");
-            let exe = root.join("PhotoCraft");
+            let exe = root.join("Atelier Pigment");
             std::fs::create_dir_all(&exe).unwrap();
             std::fs::write(exe.join(marker), b"").unwrap();
             let d = resolve(fake_home(&root), Some(&exe));

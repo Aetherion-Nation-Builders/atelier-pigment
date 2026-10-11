@@ -1,3 +1,17 @@
+Atelier Pigment
+Copyright (c) 2026 Aetherion Nation Builders.
+Licensed under the MIT License or the Apache License, Version 2.0, at your option
+(LICENSE-MIT, LICENSE-APACHE).
+
+Atelier Pigment is built on PhotoCraft (https://github.com/storytold/photocraft) and carries
+PhotoCraft's work forward under the same licenses. Files changed for Atelier are marked in the
+Git history of this repository (see docs/brand.md). The ArtCraft name, wordmark and logos are
+trademarks of the ArtCraft Team, are not used by Atelier, and are not in this repository.
+
+The Atelier and Aetherion names and marks are not covered by the licenses above.
+
+---- Upstream notice (PhotoCraft) ----
+
 PhotoCraft
 Copyright (c) 2026 ArtCraft Team and the PhotoCraft contributors.
 Licensed under the MIT License or the Apache License, Version 2.0, at your option
