@@ -125,12 +125,15 @@ jobs:
         shell: bash
         run: |
           set +e
-          grep -E "^test .* FAILED$" test.log | sed 's/^test //; s/ \.\.\. FAILED$//' | sort -u | head -10 | while read -r name; do
+          # CARGO_TERM_COLOR=always: strip the colour codes before matching.
+          sed 's/\x1b\[[0-9;]*[A-Za-z]//g' test.log > plain.log
+          grep -E "^test .* FAILED$" plain.log | sed 's/^test //; s/ \.\.\. FAILED$//' | sort -u | head -10 | while read -r name; do
             echo "::error title=Failing test::${name}"
           done
-          grep -E "panicked at|^error(\[E[0-9]+\])?:" test.log | sort -u | head -10 | while read -r line; do
+          grep -E "panicked at|^error(\[E[0-9]+\])?:|No space left|SIGKILL|signal: " plain.log | sort -u | head -10 | while read -r line; do
             echo "::error title=Test output::${line:0:900}"
           done
+          echo "::error title=Test log tail::$(tail -c 1500 plain.log | tr '\n' ' ' | cut -c1-1400)"
           true
 
       # The same codecs without the optional decoder: HEIC must stay a clear "not in this build"
