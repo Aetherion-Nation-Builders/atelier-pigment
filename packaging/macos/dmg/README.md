@@ -7,14 +7,15 @@ Finder scripting on CI, nothing extra installed in the signing job).
 
 | File | What |
 |---|---|
-| `background.svg` | Source of the background: the app icon (`assets/app-icon/photocraft-small.svg`, linked, not copied) cropped as a cover on the PhotoCraft colour field (`#2f7bf5`), Ink and Paper. Its text (Inter, JetBrains Mono) is outlined, so rendering it needs no fonts. |
+| `background.svg` | Source of the background, in Atelier's colours: the app icon (`assets/app-icon/photocraft.svg`, linked, not copied) on a volcanic-black panel (`#141210`), an ochre rule (`#d9a441`) and the ivory field (`#efe6d2`) with "Atelier Pigment". Its text (Archivo, Geist Mono) is outlined, so rendering it needs no fonts. |
 | `background.tiff` | The background at 1x (660 × 400 px, 72 dpi) and 2x (1320 × 800 px, 144 dpi) in one HiDPI TIFF (16-colour palette, Deflate, sRGB; about 90 KB). Goes to `.background/background.tiff`. |
-| `dmg-layout.DS_Store` | Finder's view settings for the volume: window size, icon size 128, PhotoCraft.app at (326, 205), `Applications` at (574, 205), and the background. Goes to `.DS_Store` in the image; named so it isn't mistaken for (or ignored like) a Finder-generated `.DS_Store`. |
+| `dmg-layout.DS_Store` | Finder's view settings for the volume: window size, icon size 128, `Atelier Pigment.app` at (326, 205), `Applications` at (574, 205), and the background. Goes to `.DS_Store` in the image; named so it isn't mistaken for (or ignored like) a Finder-generated `.DS_Store`. |
+| `atelier-background.py` | Writes `background.svg` (Atelier's layout, outlined text). |
 | `generate.py` | Writes `background.tiff` and `dmg-layout.DS_Store` from the SVG and the layout above. |
 
 ## The volume name has no version
 
-The mounted volume is called `PhotoCraft`, not `PhotoCraft <version>`. The layout points at the background
+The mounted volume is called `Atelier Pigment`, not `Atelier Pigment <version>`. The layout points at the background
 through an alias that includes the volume name, and Finder resolves it by that name: with a
 versioned name the window keeps its size and icon positions but shows no background (tested).
 The DMG file name (`photocraft-<version>-macos-<arch>.dmg`) still carries the version.
@@ -22,7 +23,7 @@ The DMG file name (`photocraft-<version>-macos-<arch>.dmg`) still carries the ve
 ## Rules
 
 - **Finder draws the icon labels in black in light and dark mode** when a window has a background,
-  so the area under both icons stays light (Paper).
+  so the area under both icons stays light (ivory).
 - **Nothing goes inside the icon boxes:** artwork keeps 10 pt clear of each 128 pt icon box and of
   the label strip under it.
 
@@ -42,3 +43,13 @@ outline it (`usvg` from resvg converts text to paths). The window is 660 × 432 
 title bar; the content area is 660 × 400.
 
 This follows VectorCraft's `packaging/macos/dmg/` (storytold/vectorcraft#493).
+
+In Atelier, `background.svg` itself is written by `atelier-background.py` (the app's name, tagline
+and icon are constants at its top; the text is outlined from Archivo and Geist Mono, which it reads
+from a fonts folder such as atelier-gate's `assets/fonts/`):
+
+```sh
+pip install fonttools
+python3 packaging/macos/dmg/atelier-background.py ../atelier-gate/assets/fonts
+python3 packaging/macos/dmg/generate.py
+```

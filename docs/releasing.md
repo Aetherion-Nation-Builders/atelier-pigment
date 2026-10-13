@@ -1,5 +1,16 @@
 # Releasing PhotoCraft
 
+> **Atelier Pigment, for now:** a release builds the **macOS DMG only**, on GitHub's standard
+> macOS runner, **unsigned** (ad-hoc signed, not notarized) until the Apple signing secrets below
+> are added. The other platforms build again when listed in the repository variable
+> `ATELIER_RELEASE_PLATFORMS` (for example `windows linux freebsd web`). The draft is named
+> `Atelier Pigment v<version>`; publish it to make it the release Atelier Gate installs. To cut one
+> without the `release` branch: **Actions › Release › Run workflow** on `main`. An unsigned app
+> downloaded in a browser opens the first time through **System Settings › Privacy & Security ›
+> Open Anyway** (macOS 15). Atelier Gate downloads without the browser's quarantine flag, so an
+> app it installs is expected to open directly. The rest of this page is
+> upstream's guide.
+
 Every push to the `release` branch runs `.github/workflows/release.yml`. The workflow builds
 signed installers for macOS, Windows, Linux and the web, plus a FreeBSD tarball, then creates
 or updates a **draft** GitHub Release named `PhotoCraft v<version>`. Nobody sees a draft until a
@@ -73,7 +84,8 @@ in `ci.yml`. Rules: `../craftrules/standards/fonts.md`; build option: `docs/deve
 ### macOS
 
 `packaging/macos/package.sh` builds `aarch64-apple-darwin` and `x86_64-apple-darwin` with
-`MACOSX_DEPLOYMENT_TARGET=11.0`, joins them with `lipo`, and assembles `PhotoCraft.app`:
+`MACOSX_DEPLOYMENT_TARGET=11.0`, joins them with `lipo`, and assembles `Atelier Pigment.app` (its executable and icon file inside keep
+the machine name `PhotoCraft`):
 
 - `Info.plist` is generated from `Info.plist.in`. The bundle id is `ai.storyteller.photocraft`.
   The plist sets `LSMinimumSystemVersion` 11.0, `NSHighResolutionCapable`, and document types:
@@ -87,8 +99,8 @@ in `ci.yml`. Rules: `../craftrules/standards/fonts.md`; build option: `docs/deve
   to drag onto). The DMG is signed, notarized and stapled too. The script checks the results
   with `codesign --verify --strict`, `stapler validate` and `spctl -a -vvv`.
   Its Finder window (background, icon size and positions) comes from
-  [`packaging/macos/dmg/`](../packaging/macos/dmg/README.md), and its volume is named `PhotoCraft`
-  without the version, which the window's background needs; the DMG file name keeps the version.
+  [`packaging/macos/dmg/`](../packaging/macos/dmg/README.md), and its volume is named
+  `Atelier Pigment` without the version, which the window's background needs; the DMG file name keeps the version.
 - **CLI:** the universal `photocraft-cli` is signed with the same Developer ID, the hardened
   runtime and a secure timestamp (identifier `ai.storyteller.photocraft-cli`), zipped, and the zip
   is sent to `notarytool`. Only `.app`, `.dmg` and `.pkg` can hold a stapled ticket, not a bare

@@ -22,5 +22,11 @@ upstream's own CI covers Windows for the code every sync brings in. `ci.yml`'s p
 lists the runners; add `windows-latest` back when preparing a Windows release.
 
 Workflows that are turned off in this repository, on purpose (they cost Actions minutes and
-build things we do not ship yet): `perf-nightly.yml`, `freebsd.yml`, `windows-arm64.yml`,
-`release.yml`. Turn one on from the Actions tab when it is wanted.
+build things we do not ship yet): `perf-nightly.yml`, `freebsd.yml`, `windows-arm64.yml`. Turn one
+on from the Actions tab when it is wanted.
+
+`release.yml` builds the macOS DMG only for now, on the standard `macos-15` runner, unsigned
+(`docs/releasing.md`). Its other platform jobs are kept from upstream and skipped unless named in
+the repository variable `ATELIER_RELEASE_PLATFORMS`; the DMG is named `Atelier Pigment.app` on an
+`Atelier Pigment` volume, with the Atelier background (`packaging/macos/dmg/`). When syncing, keep
+those lines of ours in `release.yml`, `packaging/macos/package.sh` and `packaging/macos/dmg/`.
