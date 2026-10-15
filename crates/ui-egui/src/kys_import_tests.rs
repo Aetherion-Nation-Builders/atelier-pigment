@@ -127,6 +127,7 @@ fn import_button_fills_the_dialog_and_ok_applies_the_set() {
     let id = crate::menus::invoke(h.state_mut(), &ctx, "edit.keyboardShortcuts", json!({})).unwrap()["dialog"].as_u64().unwrap();
     // A short list keeps the button row on screen.
     h.state_mut().ui.dialog_mut(id).unwrap().fields.insert("filter".into(), json!("gaussian"));
+    h.state_mut().ui.dialog_mut(id).unwrap().fields.insert("messageWarning".into(), json!(true));
     h.run_steps(2);
     h.get_by_label("Import Shortcuts…").click();
     h.run_steps(3);
@@ -144,6 +145,7 @@ fn import_button_fills_the_dialog_and_ok_applies_the_set() {
     let message = field(&h, "message");
     assert_eq!(message, json!("Imported 9 shortcuts from texcuts.kys. Click OK to keep them. 2 commands are not in Atelier Pigment."));
     assert_eq!(field(&h, "capture"), json!(false));
+    assert_eq!(field(&h, "messageWarning"), json!(false), "an import clears the earlier shortcut conflict warning");
     // Nothing is applied until OK.
     assert_eq!(crate::shortcuts::effective_shortcut(h.state(), "edit.undo", Some("Cmd+Z")).as_deref(), Some("Cmd+Shift+Z"));
     crate::dialogs::confirm(h.state_mut(), id).unwrap();
@@ -176,6 +178,31 @@ fn an_opened_kys_file_opens_the_dialog_filled() {
     assert_eq!(d.fields["message"], json!("Imported 1 shortcuts from more.kys. Click OK to keep them."));
     let bad = crate::preset_files_ui::open(&mut app, "notes.kys", b"hello").unwrap().unwrap_err();
     assert!(bad.contains("not a keyboard shortcut set (.kys)"), "{bad}");
+}
+
+/// #3665: a row listing Copy's ⌘C and F3 keeps both; the old import kept the first key only,
+/// and a row of F3 alone left ⌘C unbound only because the set says so.
+#[test]
+fn an_imported_row_keeps_its_second_key() {
+    let mut app = app();
+    let set = "<photoshop-keyboard-shortcuts>\
+        <command name=\"Copy\"><shortcut>F3</shortcut><shortcut>Cmd+C</shortcut></command>\
+        <command name=\"Cut\"><shortcut>Cmd+X</shortcut></command>\
+        <command name=\"Undo\"><shortcut>Cmd+Z</shortcut><shortcut>F1</shortcut></command>\
+        </photoshop-keyboard-shortcuts>";
+    let r = super::import_text(&mut app, "ps.kys", set).unwrap();
+    assert_eq!(r["alternateKeys"]["edit.copy"], json!(["F3"]));
+    let id = r["dialog"].as_u64().unwrap();
+    let f = &app.ui.dialog_mut(id).unwrap().fields;
+    assert!(f["overrides"].get("edit.copy").is_none(), "Copy keeps ⌘C: {}", f["overrides"]);
+    assert!(f["alternates"].get("edit.copy").is_none(), "F3 is Copy's default alternate");
+    assert_eq!(f["alternates"]["edit.cut"], json!([]), "the set gives Cut no F2");
+    assert_eq!(f["alternates"]["edit.undo"], json!(["F1"]));
+    crate::dialogs::confirm(&mut app, id).unwrap();
+    assert_eq!(crate::shortcuts::effective_shortcut(&app, "edit.copy", Some("Cmd+C")).as_deref(), Some("Cmd+C"));
+    assert_eq!(crate::shortcuts::effective_alternates(&app, "edit.copy"), ["F3"]);
+    assert!(crate::shortcuts::effective_alternates(&app, "edit.cut").is_empty());
+    assert_eq!(crate::shortcuts::effective_alternates(&app, "edit.undo"), ["F1"]);
 }
 
 type Store = std::sync::Arc<std::sync::Mutex<Option<String>>>;
