@@ -1,0 +1,54 @@
+# Throwaway diagnostics on a verify/* branch; never merged.
+name: Diagnose sync
+
+on:
+  push:
+    branches: ["verify/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  corpus:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_PROFILE_RELEASE_LTO: "false"
+      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Corpus
+        shell: bash
+        run: |
+          set -o pipefail
+          { cargo xtask corpus --all && cargo xtask test-corpus; } 2>&1 | tee gate.log
+      - name: Report
+        if: failure()
+        shell: bash
+        run: &report |
+          sed 's/\x1b\[[0-9;]*m//g' gate.log > clean.log || true
+          { grep -E "^test .* FAILED|^error(\[|:)|panicked at|^failures:|^    [a-z_:0-9]+$|assertion|left:|right:|error:|Error" clean.log | head -80; echo "----- tail -----"; tail -n 40 clean.log; } > report.txt
+          python3 - <<'PY'
+          t = open("report.txt", encoding="utf-8", errors="replace").read()
+          for i in range(0, min(len(t), 9 * 3000), 3000):
+              print("::error title=report::" + t[i:i + 3000].replace("%", "%25").replace("\r", "").replace("\n", "%0A"))
+          PY
+  web:
+    runs-on: ubuntu-latest
+    env:
+      TRUNK_VERSION: 0.21.14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Web
+        shell: bash
+        run: |
+          set -o pipefail
+          curl -fsSL "https://github.com/trunk-rs/trunk/releases/download/v${TRUNK_VERSION}/trunk-x86_64-unknown-linux-gnu.tar.gz" | tar -xz -C "$HOME/.cargo/bin" trunk
+          packaging/web/package.sh 2>&1 | tee gate.log
+      - name: Report
+        if: failure()
+        shell: bash
+        run: *report
