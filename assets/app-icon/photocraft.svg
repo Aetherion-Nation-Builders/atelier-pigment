@@ -1,8 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <!-- Atelier Pigment: the hidden sun rising behind a sweep of ochre pigment. Three colours:
-       volcanic black #141210, ivory #efe6d2, ochre #d9a441. -->
-  <rect width="512" height="512" rx="112" fill="#141210"/>
-  <circle cx="256" cy="226" r="126" fill="#efe6d2"/>
-  <path d="M78 326 C160 262 250 326 340 310 C392 300 422 282 448 266" fill="none" stroke="#141210" stroke-width="132" stroke-linecap="round"/>
-  <path d="M78 326 C160 262 250 326 340 310 C392 300 422 282 448 266" fill="none" stroke="#d9a441" stroke-width="96" stroke-linecap="round"/>
+       volcanic black #141210, ivory #efe6d2, ochre #d9a441. Drawn inside a rounded-square clip,
+       as upstream's icon is (crates/io's SVG import test opens this file and expects that mask). -->
+  <defs><clipPath id="t"><rect width="512" height="512" rx="112"/></clipPath></defs>
+  <g clip-path="url(#t)">
+    <rect width="512" height="512" fill="#141210"/>
+    <circle cx="256" cy="226" r="126" fill="#efe6d2"/>
+    <path d="M78 326 C160 262 250 326 340 310 C392 300 422 282 448 266" fill="none" stroke="#141210" stroke-width="132" stroke-linecap="round"/>
+    <path d="M78 326 C160 262 250 326 340 310 C392 300 422 282 448 266" fill="none" stroke="#d9a441" stroke-width="96" stroke-linecap="round"/>
+  </g>
 </svg>
