@@ -37,7 +37,7 @@
     <Property Id="ARPPRODUCTICON" Value="PhotocraftIcon.exe" />
     <Property Id="ARPURLINFOABOUT" Value="https://www.aetherionnnation.com/atelier/pigment" />
     <Property Id="ARPURLUPDATEINFO" Value="https://www.aetherionnnation.com/atelier/pigment" />
-    <Property Id="ARPHELPLINK" Value="https://discord.gg/artcraft" />
+    <Property Id="ARPHELPLINK" Value="https://www.aetherionnnation.com" />
 
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="Atelier Pigment" />
