@@ -349,7 +349,7 @@ fn main() -> eframe::Result {
     #[cfg(not(target_arch = "wasm32"))]
     if let Some(done) = craft_update::self_update::finish(&photocraft_ui_egui::UPDATE_APP, &std::env::args_os().skip(1).collect::<Vec<_>>()) {
         if let Err(e) = done {
-            eprintln!("PhotoCraft update helper failed: {e}");
+            eprintln!("Atelier Pigment update helper failed: {e}");
             std::process::exit(1);
         }
         return Ok(());
@@ -740,7 +740,7 @@ fn main() -> eframe::Result {
     // file to attach (#7643). A terminal or automation launch can read standard error or the
     // exit status instead, so it keeps the silent exit.
     if let Err(error) = &result {
-        log::error!("PhotoCraft could not start: {error}");
+        log::error!("Atelier Pigment could not start: {error}");
         if startup_report::needs_dialog(control_port.is_some()) {
             startup_report::show(&error.to_string(), &started_renderer, started_note.as_deref(), logger.and_then(logging::AppLogger::path).as_deref());
         }

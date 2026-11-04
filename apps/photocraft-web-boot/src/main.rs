@@ -246,7 +246,7 @@ mod boot {
             held.push(chunk);
         }
         let Some(payload) = super::payload(&head) else {
-            let e = JsValue::from_str("the download is not PhotoCraft's WebAssembly");
+            let e = JsValue::from_str("the download is not Atelier Pigment's WebAssembly");
             // Stops the rest of the download, which nothing will read.
             let _ = reader.cancel_with_reason(&e);
             return Err(e);

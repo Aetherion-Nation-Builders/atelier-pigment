@@ -379,10 +379,10 @@ fn write_shim(droplet: &str) -> Result<String> {
 # PhotoCraft droplet: runs the action on the files given (or dropped).
 if [ -n "${{PHOTOCRAFT_CLI:-}}" ]; then
   cli="$PHOTOCRAFT_CLI"
-elif [ -x /Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli ]; then
-  cli=/Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli
-elif [ -x "$HOME/Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli" ]; then
-  cli="$HOME/Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli"
+elif [ -x "/Applications/Atelier Pigment.app/Contents/MacOS/photocraft-cli" ]; then
+  cli="/Applications/Atelier Pigment.app/Contents/MacOS/photocraft-cli"
+elif [ -x "$HOME/Applications/Atelier Pigment.app/Contents/MacOS/photocraft-cli" ]; then
+  cli="$HOME/Applications/Atelier Pigment.app/Contents/MacOS/photocraft-cli"
 else
   cli=photocraft-cli
 fi
