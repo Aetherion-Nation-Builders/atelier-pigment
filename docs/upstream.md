@@ -18,9 +18,10 @@ in below the line; if the header conflicts, keep ours. For anything else, keep u
 and re-apply the rename.
 
 CI here runs on Linux only: a Windows runner bills double, and upstream's own CI covers Windows
-for the code every sync brings in. `ci.yml`'s platform step lists the legs; put the two `win`
-legs back into `all` when preparing a Windows release. A failing Clippy or test step also writes
-its failing tests as job annotations (`scripts/ci-report-failures.sh`).
+for the code every sync brings in. `ci.yml`'s `windows` job is switched off with `if: false && …`;
+drop the `false &&` when preparing a Windows release. The Linux gate runs upstream's shared
+`gate.yml` (`cargo xtask ci`); when it fails, it also writes the failing tests as job annotations
+(`scripts/ci-report-failures.sh`), as `test (without heif)` does.
 
 Workflows that are turned off in this repository, on purpose (they cost Actions minutes and
 build things we do not ship yet): `perf-nightly.yml`, `freebsd.yml`, `windows-arm64.yml`. Turn one
