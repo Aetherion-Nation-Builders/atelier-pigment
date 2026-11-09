@@ -11,6 +11,8 @@ pub const DISCORD: &str = "https://www.aetherionnnation.com";
 /// The suite (the "help.artcraftWebsite" command).
 pub const ARTCRAFT_WEBSITE: &str = "https://www.aetherionnnation.com/atelier";
 pub const APP_PAGE: &str = "https://www.aetherionnnation.com/atelier/pigment";
+/// Tutorials (the start screen's Tutorials link).
+pub const TUTORIALS: &str = "https://www.aetherionnnation.com/tutorials";
 pub const GITHUB: &str = "https://github.com/Aetherion-Nation-Builders/atelier-pigment";
 pub const ISSUES: &str = "https://github.com/Aetherion-Nation-Builders/atelier-pigment/issues";
 
