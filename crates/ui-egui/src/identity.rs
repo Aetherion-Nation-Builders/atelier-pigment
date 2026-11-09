@@ -15,16 +15,39 @@ pub const VENDOR: &str = "Aetherion Nation";
 /// The upstream project this app is built on, as named in its own strings and catalogs.
 pub const UPSTREAM: &str = "PhotoCraft";
 
+/// The upstream name written in another script by a catalog, with the case endings it takes there,
+/// and what replaces it (our name in Latin letters, the ending after a hyphen). Longest first, so
+/// an inflected form is replaced before its stem.
+const TRANSLITERATED: &[(&str, &str)] = &[
+    // Tamil (ta.tsv): ablative, locative-ablative, instrumental, genitive, locative, accusative.
+    ("போட்டோகிராப்டிலிருந்து", "Atelier Pigment-இலிருந்து"),
+    ("போட்டோகிராப்டால்", "Atelier Pigment-ஆல்"),
+    ("போட்டோகிராப்டின்", "Atelier Pigment-இன்"),
+    ("போட்டோகிராப்டில்", "Atelier Pigment-இல்"),
+    ("போட்டோகிராப்டை", "Atelier Pigment-ஐ"),
+    ("போட்டோகிராப்ட்", "Atelier Pigment"),
+];
+
 /// Rewrites an upstream string so it names this product. Applied to every translation catalog
 /// entry as it is read, so the UI follows the brand in every language without editing the
 /// catalogs (which would make every upstream catalog change a merge conflict).
 pub fn rewrite(s: &str) -> String {
-    s.replace(UPSTREAM, PRODUCT)
+    let mut out = s.replace(UPSTREAM, PRODUCT);
+    for (from, to) in TRANSLITERATED {
+        if out.contains(from) {
+            out = out.replace(from, to);
+        }
+    }
+    out
 }
 
 /// Like [`rewrite`], borrowing when there is nothing to change (the common case).
 pub fn rewrite_cow(s: &str) -> std::borrow::Cow<'_, str> {
-    if s.contains(UPSTREAM) { std::borrow::Cow::Owned(rewrite(s)) } else { std::borrow::Cow::Borrowed(s) }
+    if s.contains(UPSTREAM) || TRANSLITERATED.iter().any(|(from, _)| s.contains(from)) {
+        std::borrow::Cow::Owned(rewrite(s))
+    } else {
+        std::borrow::Cow::Borrowed(s)
+    }
 }
 
 #[cfg(test)]
@@ -38,6 +61,19 @@ mod tests {
         assert_eq!(rewrite("Photoshop"), "Photoshop");
         assert!(matches!(rewrite_cow("Open"), std::borrow::Cow::Borrowed(_)));
         assert!(matches!(rewrite_cow("Quit PhotoCraft"), std::borrow::Cow::Owned(_)));
+    }
+
+    #[test]
+    fn transliterated_upstream_names_are_rewritten_with_their_endings() {
+        assert_eq!(rewrite("போட்டோகிராப்ட் பற்றி"), "Atelier Pigment பற்றி");
+        assert_eq!(rewrite("போட்டோகிராப்டை தொடங்கவும்"), "Atelier Pigment-ஐ தொடங்கவும்");
+        assert_eq!(rewrite("போட்டோகிராப்டிலிருந்து"), "Atelier Pigment-இலிருந்து");
+        assert!(matches!(rewrite_cow("போட்டோகிராப்டில்"), std::borrow::Cow::Owned(_)));
+        // Every catalog row that names the upstream product in Tamil script is caught.
+        let ta = include_str!("i18n/ta.tsv");
+        for line in ta.lines().filter(|l| !l.starts_with('#')) {
+            assert!(!rewrite(line).contains("போட்டோகிராப்ட"), "{line}");
+        }
     }
 
     #[test]
