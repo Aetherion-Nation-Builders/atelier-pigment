@@ -81,7 +81,7 @@ fn edited_then_switching() -> (Harness<'static, PhotocraftApp>, u64) {
     assert_eq!(shown_set(&h), "A");
     set_field(&mut h, id, "overrides", json!({"edit.copy": "F8"}));
     assert_eq!(shown_set(&h), "A (modified)");
-    pick_set(&mut h, "PhotoCraft Defaults");
+    pick_set(&mut h, "Atelier Pigment Defaults");
     (h, id)
 }
 
@@ -113,7 +113,7 @@ fn no_discards_the_edits_and_switches() {
     assert!(!asking(&h));
     assert_eq!(field(&h, id, "activeSet"), json!(""));
     assert_eq!(field(&h, id, "overrides"), json!({}), "the defaults' bindings");
-    assert_eq!(shown_set(&h), "PhotoCraft Defaults");
+    assert_eq!(shown_set(&h), "Atelier Pigment Defaults");
     assert_eq!(field(&h, id, "sets")["A"]["shortcuts"], json!({"edit.copy": "F9"}), "A as it was saved");
     pick_set(&mut h, "A");
     assert!(!asking(&h), "no edits, no question");
@@ -155,7 +155,7 @@ fn cancelling_the_name_after_yes_keeps_the_set_and_its_edits() {
 #[test]
 fn an_unmodified_set_switches_at_once() {
     let (mut h, id) = dialog();
-    pick_set(&mut h, "PhotoCraft Defaults");
+    pick_set(&mut h, "Atelier Pigment Defaults");
     assert!(!asking(&h));
     assert_eq!(field(&h, id, "activeSet"), json!(""));
     assert_eq!(field(&h, id, "overrides"), json!({}));
@@ -171,7 +171,7 @@ fn an_action_function_key_is_no_edit() {
     let id = crate::menus::invoke(h.state_mut(), &ctx, "edit.keyboardShortcuts", json!({})).unwrap()["dialog"].as_u64().unwrap();
     h.run_steps(4);
     assert_eq!(shown_set(&h), "A", "an action key doesn't modify A");
-    pick_set(&mut h, "PhotoCraft Defaults");
+    pick_set(&mut h, "Atelier Pigment Defaults");
     assert!(!asking(&h));
     assert_eq!(field(&h, id, "activeSet"), json!(""));
 }
@@ -179,15 +179,15 @@ fn an_action_function_key_is_no_edit() {
 #[test]
 fn the_modified_defaults_offer_their_own_copy_name() {
     let (mut h, id) = dialog();
-    pick_set(&mut h, "PhotoCraft Defaults");
+    pick_set(&mut h, "Atelier Pigment Defaults");
     set_field(&mut h, id, "overrides", json!({"edit.cut": "F7"}));
-    assert_eq!(shown_set(&h), "PhotoCraft Defaults (modified)");
+    assert_eq!(shown_set(&h), "Atelier Pigment Defaults (modified)");
     pick_set(&mut h, "A");
     assert!(asking(&h));
     click(&mut h, "Yes");
-    assert_eq!(field(&h, id, "newSetName"), json!("PhotoCraft Defaults Copy"));
+    assert_eq!(field(&h, id, "newSetName"), json!("Atelier Pigment Defaults Copy"));
     click(&mut h, "Create");
-    assert_eq!(field(&h, id, "sets")["PhotoCraft Defaults Copy"]["shortcuts"], json!({"edit.cut": "F7"}));
+    assert_eq!(field(&h, id, "sets")["Atelier Pigment Defaults Copy"]["shortcuts"], json!({"edit.cut": "F7"}));
     assert_eq!(field(&h, id, "activeSet"), json!("A"));
     assert_eq!(field(&h, id, "overrides"), json!({"edit.copy": "F9"}));
 }
@@ -205,7 +205,7 @@ fn another_set_chosen_during_the_name_step_ends_it_and_its_pending_switch() {
     set_field(&mut h, id, "sets", json!(sets));
     set_field(&mut h, id, "activeSet", json!("A"));
     set_field(&mut h, id, "overrides", json!({"edit.copy": "F8"}));
-    pick_set(&mut h, "PhotoCraft Defaults");
+    pick_set(&mut h, "Atelier Pigment Defaults");
     click(&mut h, "Yes");
     assert_eq!(field(&h, id, "newSetName"), json!("A Copy"), "the name step is open");
     assert_eq!(field(&h, id, "switchAfterSave"), json!(""), "with the defaults as the pending target");
@@ -229,7 +229,7 @@ fn choosing_a_set_during_the_name_step_ends_it_before_the_new_question_is_answer
     set_field(&mut h, id, "sets", json!(sets));
     set_field(&mut h, id, "activeSet", json!("A"));
     set_field(&mut h, id, "overrides", json!({"edit.copy": "F8"}));
-    pick_set(&mut h, "PhotoCraft Defaults");
+    pick_set(&mut h, "Atelier Pigment Defaults");
     click(&mut h, "Yes");
     assert_eq!(field(&h, id, "newSetName"), json!("A Copy"));
     pick_set(&mut h, "B");
