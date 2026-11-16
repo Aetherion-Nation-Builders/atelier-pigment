@@ -69,10 +69,12 @@ mod tests {
         assert_eq!(rewrite("போட்டோகிராப்டை தொடங்கவும்"), "Atelier Pigment-ஐ தொடங்கவும்");
         assert_eq!(rewrite("போட்டோகிராப்டிலிருந்து"), "Atelier Pigment-இலிருந்து");
         assert!(matches!(rewrite_cow("போட்டோகிராப்டில்"), std::borrow::Cow::Owned(_)));
-        // Every catalog row that names the upstream product in Tamil script is caught.
-        let ta = include_str!("i18n/ta.tsv");
-        for line in ta.lines().filter(|l| !l.starts_with('#')) {
-            assert!(!rewrite(line).contains("போட்டோகிராப்ட"), "{line}");
+        // Every catalog row that names the upstream product in Tamil script is caught (when the
+        // craft-i18n catalogs are embedded).
+        if let Some(ta) = crate::i18n::Lang::from_code("ta") {
+            for text in ta.catalog_texts() {
+                assert!(!text.contains("போட்டோகிராப்ட"), "a Tamil catalog row still names the upstream product");
+            }
         }
     }
 
@@ -108,6 +110,24 @@ pub fn strings(code: &str) -> Vec<(&'static str, &'static str)> {
     if own.is_empty() { of("en") } else { own }
 }
 
+/// One embedded app catalog (craft-i18n's catalog format: context, source, translation, tab
+/// separated) as this app reads it: the brand strings for `code` first, so they win over any
+/// upstream row with the same key, then the upstream rows with [`rewrite`] applied to every one.
+pub fn branded_catalog(code: &str, upstream: &str) -> String {
+    let upstream = upstream.strip_prefix('\u{feff}').unwrap_or(upstream);
+    let escape = |s: &str| s.replace('\\', "\\\\").replace('\n', "\\n").replace('\t', "\\t");
+    let mut out = String::with_capacity(upstream.len() + 1024);
+    for (src, tr) in strings(code) {
+        out.push('\t');
+        out.push_str(&escape(src));
+        out.push('\t');
+        out.push_str(&escape(tr));
+        out.push('\n');
+    }
+    out.push_str(&rewrite(upstream));
+    out
+}
+
 #[cfg(test)]
 mod string_tests {
     use super::*;
@@ -134,5 +154,15 @@ mod string_tests {
             }
         }
         assert_eq!(strings("xx"), strings("en"));
+    }
+
+    #[test]
+    fn a_branded_catalog_puts_our_rows_first_and_renames_the_rest() {
+        let text = branded_catalog("fr", "\u{feff}# comment\n\tAbout PhotoCraft\tÀ propos de PhotoCraft\n");
+        let first = text.lines().next().unwrap_or_default();
+        assert_eq!(first, "\tJoin the Nation\tRejoindre la Nation");
+        assert!(text.contains("\tAbout Atelier Pigment\tÀ propos de Atelier Pigment\n"));
+        assert!(!text.contains('\u{feff}'));
+        assert!(!text.contains(UPSTREAM) || text.contains("Built on PhotoCraft"));
     }
 }
