@@ -59,10 +59,10 @@ pub(super) fn integration_rows(ui: &mut egui::Ui, obj: &mut Map<String, Value>, 
     let t = Tokens::get(ui.ctx());
     let status = f.get("__agentLink").cloned().unwrap_or(Value::Null);
     let launch_flags = status.get("launchFlags").and_then(Value::as_bool) == Some(true);
-    // One switch for every Craft app: ArtCraft Launcher › Settings › AI agents. There is none here.
+    // One switch for every Craft app: Atelier Gate › Settings › AI agents. There is none here.
     ui.label(
         RichText::new(tl!(
-            "AI apps such as Claude can open, edit and save documents in this window while ArtCraft Launcher › Settings › AI agents › Let AI agents use Craft apps is on. Only programs on this computer can connect."
+            "AI apps such as Claude can open, edit and save documents in this window while Atelier Gate › Settings › AI agents › Let AI agents use Craft apps is on. Only programs on this computer can connect."
         ))
         .color(t.text_dim),
     );
@@ -73,7 +73,7 @@ pub(super) fn integration_rows(ui: &mut egui::Ui, obj: &mut Map<String, Value>, 
         (true, _, _) => (tl!("Managed by the launch options (--control).").to_string(), t.text_dim),
         (false, _, Some(e)) => (e.to_string(), t.danger),
         (false, Some(p), None) => (crate::i18n::fmt(tl!("Agents can connect on 127.0.0.1:{port}."), &[("port", &p.to_string())]), t.accent_text),
-        (false, None, None) => (tl!("Off: turn on AI agents in ArtCraft Launcher › Settings › AI agents.").to_string(), t.text_faint),
+        (false, None, None) => (tl!("Off: turn on AI agents in Atelier Gate › Settings › AI agents.").to_string(), t.text_faint),
     };
     ui.label(RichText::new(line).color(color));
     ui.add_space(8.0);

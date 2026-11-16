@@ -537,9 +537,11 @@ struct BrandOverlay {
 
 impl BrandOverlay {
     fn rename(&self, text: &str) -> String {
+        // The launcher's name too, as `identity::OTHER_NAMES` renames it.
+        let text = text.replace("ArtCraft Launcher", "Atelier Gate");
         match &self.rename {
             Some((from, to)) => text.replace(from.as_str(), to.as_str()),
-            None => text.to_string(),
+            None => text,
         }
     }
 

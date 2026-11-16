@@ -71,7 +71,7 @@ fn apply(running: &mut Option<Running>, dir: Option<&Path>, integrations: &Integ
     }
     let Some(dir) = dir else {
         out.stopped = running.take().is_some();
-        out.status.error = Some("Agents can't connect: PhotoCraft has no settings folder (no home folder).".into());
+        out.status.error = Some("Agents can't connect: Atelier Pigment has no settings folder (no home folder).".into());
         return out;
     };
     if running.as_ref().is_none_or(|r| r.port_pref != integrations.control_port) {
@@ -128,13 +128,13 @@ pub fn launcher_watch(ctx: &egui::Context) -> Box<dyn Fn() -> bool> {
             std::thread::sleep(LAUNCHER_POLL);
             let now = agent_link::launcher_allows_agents();
             if seen.swap(now, Ordering::Relaxed) != now {
-                log::info!("ArtCraft Launcher: agents {}", if now { "on" } else { "off" });
+                log::info!("Atelier Gate: agents {}", if now { "on" } else { "off" });
                 ctx.request_repaint();
             }
         }
     });
     if let Err(e) = started {
-        log::warn!("couldn't watch the ArtCraft Launcher's agents switch: {e}");
+        log::warn!("couldn't watch the Atelier Gate's agents switch: {e}");
     }
     Box::new(move || on.load(Ordering::Relaxed))
 }

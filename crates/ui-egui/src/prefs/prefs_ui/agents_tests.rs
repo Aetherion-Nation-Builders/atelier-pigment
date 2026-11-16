@@ -139,8 +139,8 @@ fn ai_integrations_point_to_the_launcher_and_have_no_switch_or_client_buttons() 
     for label in ["Let AI agents connect (MCP)", "Copy Configuration", "Add to Claude Desktop", "Copy Prompt for an Agent"] {
         assert!(h.query_by_label(label).is_none(), "{label}");
     }
-    h.get_by_label_contains("ArtCraft Launcher › Settings › AI agents › Let AI agents use Craft apps");
-    h.get_by_label("Off: turn on AI agents in ArtCraft Launcher › Settings › AI agents.");
+    h.get_by_label_contains("Atelier Gate › Settings › AI agents › Let AI agents use Craft apps");
+    h.get_by_label("Off: turn on AI agents in Atelier Gate › Settings › AI agents.");
     assert!(h.query_by_label("Folder agents can open from").is_some(), "the folders stay");
 }
 

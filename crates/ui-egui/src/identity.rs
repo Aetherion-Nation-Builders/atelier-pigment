@@ -28,12 +28,16 @@ const TRANSLITERATED: &[(&str, &str)] = &[
     ("போட்டோகிராப்ட்", "Atelier Pigment"),
 ];
 
+/// Other upstream names the UI shows, and ours for them: the suite's launcher, where agents are
+/// switched on for every app.
+const OTHER_NAMES: &[(&str, &str)] = &[("ArtCraft Launcher", "Atelier Gate")];
+
 /// Rewrites an upstream string so it names this product. Applied to every translation catalog
 /// entry as it is read, so the UI follows the brand in every language without editing the
 /// catalogs (which would make every upstream catalog change a merge conflict).
 pub fn rewrite(s: &str) -> String {
     let mut out = s.replace(UPSTREAM, PRODUCT);
-    for (from, to) in TRANSLITERATED {
+    for (from, to) in OTHER_NAMES.iter().chain(TRANSLITERATED) {
         if out.contains(from) {
             out = out.replace(from, to);
         }
@@ -43,7 +47,7 @@ pub fn rewrite(s: &str) -> String {
 
 /// Like [`rewrite`], borrowing when there is nothing to change (the common case).
 pub fn rewrite_cow(s: &str) -> std::borrow::Cow<'_, str> {
-    if s.contains(UPSTREAM) || TRANSLITERATED.iter().any(|(from, _)| s.contains(from)) {
+    if s.contains(UPSTREAM) || OTHER_NAMES.iter().chain(TRANSLITERATED).any(|(from, _)| s.contains(from)) {
         std::borrow::Cow::Owned(rewrite(s))
     } else {
         std::borrow::Cow::Borrowed(s)
@@ -59,6 +63,7 @@ mod tests {
         assert_eq!(rewrite("About PhotoCraft"), "About Atelier Pigment");
         assert_eq!(rewrite("PhotoCraft — PhotoCraft"), "Atelier Pigment — Atelier Pigment");
         assert_eq!(rewrite("Photoshop"), "Photoshop");
+        assert_eq!(rewrite("Turn on AI agents in ArtCraft Launcher › Settings."), "Turn on AI agents in Atelier Gate › Settings.");
         assert!(matches!(rewrite_cow("Open"), std::borrow::Cow::Borrowed(_)));
         assert!(matches!(rewrite_cow("Quit PhotoCraft"), std::borrow::Cow::Owned(_)));
     }

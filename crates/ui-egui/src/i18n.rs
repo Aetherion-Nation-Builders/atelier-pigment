@@ -74,7 +74,8 @@ static BRANDED: LazyLock<&'static craft_i18n::Embedded> = LazyLock::new(|| {
             (*code, shared, app)
         })
         .collect();
-    Box::leak(entries.into_boxed_slice())
+    let branded: &'static craft_i18n::Embedded = Box::leak(entries.into_boxed_slice());
+    branded
 });
 
 /// One UI language PhotoCraft offers, when its catalogs are embedded: what the app needs beyond
