@@ -15,16 +15,43 @@ pub const VENDOR: &str = "Aetherion Nation";
 /// The upstream project this app is built on, as named in its own strings and catalogs.
 pub const UPSTREAM: &str = "PhotoCraft";
 
+/// The upstream name written in another script by a catalog, with the case endings it takes there,
+/// and what replaces it (our name in Latin letters, the ending after a hyphen). Longest first, so
+/// an inflected form is replaced before its stem.
+const TRANSLITERATED: &[(&str, &str)] = &[
+    // Tamil (ta.tsv): ablative, locative-ablative, instrumental, genitive, locative, accusative.
+    ("போட்டோகிராப்டிலிருந்து", "Atelier Pigment-இலிருந்து"),
+    ("போட்டோகிராப்டால்", "Atelier Pigment-ஆல்"),
+    ("போட்டோகிராப்டின்", "Atelier Pigment-இன்"),
+    ("போட்டோகிராப்டில்", "Atelier Pigment-இல்"),
+    ("போட்டோகிராப்டை", "Atelier Pigment-ஐ"),
+    ("போட்டோகிராப்ட்", "Atelier Pigment"),
+];
+
+/// Other upstream names the UI shows, and ours for them: the suite's launcher, where agents are
+/// switched on for every app.
+const OTHER_NAMES: &[(&str, &str)] = &[("ArtCraft Launcher", "Atelier Gate")];
+
 /// Rewrites an upstream string so it names this product. Applied to every translation catalog
 /// entry as it is read, so the UI follows the brand in every language without editing the
 /// catalogs (which would make every upstream catalog change a merge conflict).
 pub fn rewrite(s: &str) -> String {
-    s.replace(UPSTREAM, PRODUCT)
+    let mut out = s.replace(UPSTREAM, PRODUCT);
+    for (from, to) in OTHER_NAMES.iter().chain(TRANSLITERATED) {
+        if out.contains(from) {
+            out = out.replace(from, to);
+        }
+    }
+    out
 }
 
 /// Like [`rewrite`], borrowing when there is nothing to change (the common case).
 pub fn rewrite_cow(s: &str) -> std::borrow::Cow<'_, str> {
-    if s.contains(UPSTREAM) { std::borrow::Cow::Owned(rewrite(s)) } else { std::borrow::Cow::Borrowed(s) }
+    if s.contains(UPSTREAM) || OTHER_NAMES.iter().chain(TRANSLITERATED).any(|(from, _)| s.contains(from)) {
+        std::borrow::Cow::Owned(rewrite(s))
+    } else {
+        std::borrow::Cow::Borrowed(s)
+    }
 }
 
 #[cfg(test)]
@@ -36,8 +63,24 @@ mod tests {
         assert_eq!(rewrite("About PhotoCraft"), "About Atelier Pigment");
         assert_eq!(rewrite("PhotoCraft — PhotoCraft"), "Atelier Pigment — Atelier Pigment");
         assert_eq!(rewrite("Photoshop"), "Photoshop");
+        assert_eq!(rewrite("Turn on AI agents in ArtCraft Launcher › Settings."), "Turn on AI agents in Atelier Gate › Settings.");
         assert!(matches!(rewrite_cow("Open"), std::borrow::Cow::Borrowed(_)));
         assert!(matches!(rewrite_cow("Quit PhotoCraft"), std::borrow::Cow::Owned(_)));
+    }
+
+    #[test]
+    fn transliterated_upstream_names_are_rewritten_with_their_endings() {
+        assert_eq!(rewrite("போட்டோகிராப்ட் பற்றி"), "Atelier Pigment பற்றி");
+        assert_eq!(rewrite("போட்டோகிராப்டை தொடங்கவும்"), "Atelier Pigment-ஐ தொடங்கவும்");
+        assert_eq!(rewrite("போட்டோகிராப்டிலிருந்து"), "Atelier Pigment-இலிருந்து");
+        assert!(matches!(rewrite_cow("போட்டோகிராப்டில்"), std::borrow::Cow::Owned(_)));
+        // Every catalog row that names the upstream product in Tamil script is caught (when the
+        // craft-i18n catalogs are embedded).
+        if let Some(ta) = crate::i18n::Lang::from_code("ta") {
+            for text in ta.catalog_texts() {
+                assert!(!text.contains("போட்டோகிராப்ட"), "a Tamil catalog row still names the upstream product");
+            }
+        }
     }
 
     #[test]
@@ -72,6 +115,24 @@ pub fn strings(code: &str) -> Vec<(&'static str, &'static str)> {
     if own.is_empty() { of("en") } else { own }
 }
 
+/// One embedded app catalog (craft-i18n's catalog format: context, source, translation, tab
+/// separated) as this app reads it: the brand strings for `code` first, so they win over any
+/// upstream row with the same key, then the upstream rows with [`rewrite`] applied to every one.
+pub fn branded_catalog(code: &str, upstream: &str) -> String {
+    let upstream = upstream.strip_prefix('\u{feff}').unwrap_or(upstream);
+    let escape = |s: &str| s.replace('\\', "\\\\").replace('\n', "\\n").replace('\t', "\\t");
+    let mut out = String::with_capacity(upstream.len() + 1024);
+    for (src, tr) in strings(code) {
+        out.push('\t');
+        out.push_str(&escape(src));
+        out.push('\t');
+        out.push_str(&escape(tr));
+        out.push('\n');
+    }
+    out.push_str(&rewrite(upstream));
+    out
+}
+
 #[cfg(test)]
 mod string_tests {
     use super::*;
@@ -98,5 +159,15 @@ mod string_tests {
             }
         }
         assert_eq!(strings("xx"), strings("en"));
+    }
+
+    #[test]
+    fn a_branded_catalog_puts_our_rows_first_and_renames_the_rest() {
+        let text = branded_catalog("fr", "\u{feff}# comment\n\tAbout PhotoCraft\tÀ propos de PhotoCraft\n");
+        let first = text.lines().next().unwrap_or_default();
+        assert_eq!(first, "\tJoin the Nation\tRejoindre la Nation");
+        assert!(text.contains("\tAbout Atelier Pigment\tÀ propos de Atelier Pigment\n"));
+        assert!(!text.contains('\u{feff}'));
+        assert!(!text.contains(UPSTREAM) || text.contains("Built on PhotoCraft"));
     }
 }
